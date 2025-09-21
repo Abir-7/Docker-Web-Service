@@ -1,6 +1,6 @@
- ##======================================================
+ #======================================================
  
- ##🚀 Docker Compose Service Setup
+ *🚀 Docker Compose Service Setup
 
  ##This file runs:
 ## - Postgres (DB)
