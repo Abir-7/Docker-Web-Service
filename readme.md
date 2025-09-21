@@ -3,8 +3,8 @@
 This project runs:
 
 - Postgres (DB)  
-- Redis (Cache / PubSub)  
-- RabbitMQ (Queue + UI)  
+- Redis  
+- RabbitMQ 
 - MongoDB (3-node Replica Set)
 
 ## Start / Stop Services
