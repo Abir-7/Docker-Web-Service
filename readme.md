@@ -1,7 +1,7 @@
-# ======================================================
-# 🚀 Docker Compose Service Setup
-#
-# This file runs:
+ ======================================================
+ 🚀 Docker Compose Service Setup
+
+ This file runs:
 # - Postgres (DB)
 # - Redis (Cache / PubSub)
 # - RabbitMQ (Message Queue with Management UI)
