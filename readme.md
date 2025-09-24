@@ -30,7 +30,7 @@ docker-compose -f docker-compose-service.yml down
 
 ### MongoDB Replica Set
 - **Docker:** `mongodb://mongo1:27017,mongo2:27018,mongo3:27019/mydb?replicaSet=rs0`  
-- **Local:** `mongodb://localhost:27017,localhost:27018,localhost:27019/mydb?replicaSet=rs0`  
+- **Local:** `mongodb://localhost:<primary_port>/<db_name>?directConnection=true`  
 
 ### Initialize Replica Set
 ```bash
