@@ -48,7 +48,7 @@ services:
 
   # ================== MONGO REPLICA SET ==================
   mongo1:
-    image: mongo:6
+    image: mongo:latest
     container_name: mongo1
     command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
@@ -59,7 +59,7 @@ services:
       - app-network
 
   mongo2:
-    image: mongo:6
+    image: mongo:latest
     container_name: mongo2
     command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
@@ -70,7 +70,7 @@ services:
       - app-network
 
   mongo3:
-    image: mongo:6
+    image: mongo:latest
     container_name: mongo3
     command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
