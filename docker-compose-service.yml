@@ -55,8 +55,10 @@ services:
       - "27017:27017"
     volumes:
       - mongo1-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - app-network
+    restart: unless-stopped
 
   mongo2:
     image: mongo:7
@@ -68,6 +70,7 @@ services:
       - mongo2-data:/data/db
     networks:
       - app-network
+    restart: unless-stopped
 
   mongo3:
     image: mongo:7
@@ -79,15 +82,14 @@ services:
       - mongo3-data:/data/db
     networks:
       - app-network
+    restart: unless-stopped
 
-# ================== VOLUMES ==================
 volumes:
   pgdata:
   mongo1-data:
   mongo2-data:
   mongo3-data:
 
-# ================== NETWORK ==================
 networks:
   app-network:
     driver: bridge
