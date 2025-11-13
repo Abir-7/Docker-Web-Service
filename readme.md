@@ -51,4 +51,17 @@ docker exec -it mongo1 mongosh
 ### Drizzle Command
 ```
 npx drizzle-kit generate
-npx drizzle-kit push
+npx drizzle-kit push 
+```
+### Local S3 minio env
+```
+AWS_REGION=us-east-1
+AWS_S3_ENDPOINT=http://localhost:9000
+AWS_S3_FORCE_PATH_STYLE=true
+AWS_ACCESS_KEY_ID=minioadmin
+AWS_SECRET_ACCESS_KEY=minioadmin
+AWS_S3_BUCKET=my-test-bucket
+
+```
+
+
