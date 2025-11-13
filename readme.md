@@ -19,6 +19,10 @@ docker-compose -f docker-compose-service.yml down
 - **Docker:** `postgres://postgres:postgres@postgres:5432/mydatabase`  
 - **Local:** `postgres://postgres:postgres@localhost:5432/mydatabase`  
 
+### Create Database
+-  `docker exec -it postgres psql -U postgres`  
+- `CREATE DATABASE [db_name]`  
+
 ### Redis
 - **Docker:** `redis://redis:6379`  
 - **Local:** `redis://localhost:6379`  
