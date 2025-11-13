@@ -21,7 +21,7 @@ docker-compose -f docker-compose-service.yml down
 
 ### Create Database
 -  `docker exec -it postgres psql -U postgres`  
-- `CREATE DATABASE [db_name]`  
+- `CREATE DATABASE [db_name];`  
 
 ### Redis
 - **Docker:** `redis://redis:6379`  
