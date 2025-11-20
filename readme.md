@@ -9,7 +9,7 @@ This project runs:
 
 ## Start / Stop Services
 ```bash
-docker-compose -f docker-compose-service.yml up -d
+docker-compose -f docker-compose-service.yml up -d  "OR" docker-compose -f docker-compose-service.yml exec postgres psql -U postgres  
 docker-compose -f docker-compose-service.yml down
 ```
 
