@@ -64,4 +64,5 @@ AWS_S3_BUCKET=my-test-bucket
 
 ```
 
+### docker-compose -f docker-compose-service.yml ps  --- to see running container in linux
 
