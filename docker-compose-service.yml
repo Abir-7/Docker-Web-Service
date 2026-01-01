@@ -44,6 +44,8 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+    volumes:
+     - redis-data:/data
     networks:
       - app-network
     healthcheck:
@@ -148,6 +150,7 @@ volumes:
   mongo2-data:
   mongo3-data:
   minio_data:
+  redis-data:
 
 networks:
   app-network:
