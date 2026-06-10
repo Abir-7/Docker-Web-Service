@@ -1,157 +1,86 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  # ================== POSTGRES ==================
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    restart: always
+  # S3 (MinIO)
+  s3:
+    container_name: s3
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"   # host port 5050 mapped to container port 80
-    networks:
-      - app-network
-    depends_on:
-      - postgres
-
-  # ================== REDIS ==================
-  redis:
-    image: redis:7
-    container_name: global-redis
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
-    volumes:
-     - redis-data:/data
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ================== RABBITMQ ==================
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: global-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-    networks:
-      - app-network
-
-  # ================== MONGO REPLICA SET ==================
-  mongo1:
-    image: mongo:7
-    container_name: mongo1
-    command: ["--replSet", "rs0", "--bind_ip_all"]
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo1-data:/data/db
-    networks:
-      - app-network
-    restart: unless-stopped
-
-  mongo2:
-    image: mongo:7
-    container_name: mongo2
-    command: ["--replSet", "rs0", "--bind_ip_all"]
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo2-data:/data/db
-    networks:
-      - app-network
-    restart: unless-stopped
-
-  mongo3:
-    image: mongo:7
-    container_name: mongo3
-    command: ["--replSet", "rs0", "--bind_ip_all"]
-    ports:
-      - "27019:27017"
-    volumes:
-      - mongo3-data:/data/db
-    networks:
-      - app-network
-    restart: unless-stopped
-
- # ================== MINIO (S3 EMULATOR) ==================
-  minio:
-    image: minio/minio:latest
-    container_name: minio
-    restart: always
-    ports:
-      - "9000:9000"  # S3 API
-      - "9001:9001"  # Web console
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
-    networks:
-      - app-network
 
-  # ================== MINIO BUCKET INITIALIZER ==================
-  createbuckets:
-    image: minio/mc:latest
+  # MongoDB with Replica Set (for transactions)
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo "db.runCommand('ping').ok" | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # MongoDB Replica Set Initializer
+  mongodb-rs-init:
+    image: mongo:latest
     depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      sleep 5;
-      mc alias set local http://minio:9000 minioadmin minioadmin;
-      mc mb local/my-test-bucket;
-      mc anonymous set public local/my-test-bucket;
-      exit 0;
-      "
-    networks:
-      - app-network
+      mongodb:
+        condition: service_healthy
+    command: >
+      mongosh --host mongodb:27017 --eval '
+        rs.initiate({
+          _id: "rs0",
+          members: [{ _id: 0, host: "mongodb:27017" }]
+        })
+      '
 
-# ================== VOLUMES ==================
+  # PostgreSQL
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-mydatabase}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  # pgAdmin
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  # Redis
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 volumes:
-  pgdata:
-  mongo1-data:
-  mongo2-data:
-  mongo3-data:
+  mongodb_data:
+  postgres_data:
+  redis_data:
   minio_data:
-  redis-data:
-
-networks:
-  app-network:
-    driver: bridge
